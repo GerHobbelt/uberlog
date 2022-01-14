@@ -19,7 +19,7 @@
 #include <math.h>
 #include "uberlog.h"
 
-void Die(const char* file, int line, const char* msg)
+static void Die(const char* file, int line, const char* msg)
 {
 	printf("Assertion Failed\n%s:%d %s\n", file, line, msg);
 	//__debugbreak();
@@ -48,7 +48,7 @@ const char* EOL = "\r\n";
 const char* EOL = "\n";
 #endif
 
-double AccurateTimeSeconds()
+static double AccurateTimeSeconds()
 {
 #ifdef _MSC_VER
 	LARGE_INTEGER c, f;
@@ -63,7 +63,7 @@ double AccurateTimeSeconds()
 }
 
 // If 'expected' is null, verify that file cannot be opened.
-void LogFileEquals(const char* expected)
+static void LogFileEquals(const char* expected)
 {
 	int f = open(TestLog, O_BINARY | O_RDONLY, 0);
 	if (f == -1)
@@ -99,7 +99,7 @@ void LogFileEquals(const char* expected)
 	close(f);
 }
 
-bool FileExists(const char* path)
+static bool FileExists(const char* path)
 {
 #ifdef _WIN32
 	return GetFileAttributesA(path) != INVALID_FILE_ATTRIBUTES;
@@ -109,7 +109,7 @@ bool FileExists(const char* path)
 #endif
 }
 
-void DeleteLogFile()
+static void DeleteLogFile()
 {
 	if (!FileExists(TestLog))
 		return;
@@ -120,7 +120,7 @@ void DeleteLogFile()
 	ASSERT(false && "Unable to delete log file");
 }
 
-std::string MakeMsg(int len, int seed = 0)
+static std::string MakeMsg(int len, int seed = 0)
 {
 	std::string x;
 	for (int i = 0; x.length() < (size_t) len; i++)
@@ -176,7 +176,7 @@ using namespace uberlog::internal;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void TestProcessLifecycle()
+static void TestProcessLifecycle()
 {
 	printf("Process Lifecycle\n");
 	for (int i = 0; i < 10; i++)
@@ -188,7 +188,7 @@ void TestProcessLifecycle()
 	}
 }
 
-void TestFormattedWrite()
+static void TestFormattedWrite()
 {
 	printf("Formatted Write\n");
 	LogOpenCloser oc;
@@ -203,7 +203,7 @@ void TestFormattedWrite()
 	LogFileEquals(expect.c_str());
 }
 
-void TestRingBuffer()
+static void TestRingBuffer()
 {
 	printf("Ring Buffer\n");
 	// Test two sizes of ring buffer. One that's smaller than LoggerSlaveWriteBufferSize, and one that's larger.
@@ -243,14 +243,14 @@ void TestRingBuffer()
 	}
 }
 
-void TestStdOut()
+static void TestStdOut()
 {
 	uberlog::Logger l;
 	l.OpenStdOut();
 	l.Info("straight outta stdout");
 }
 
-void TestNoDate()
+static void TestNoDate()
 {
 	uberlog::Logger l;
 	l.OpenStdOut();
@@ -293,7 +293,7 @@ struct Stats
 	}
 };
 
-void Bench(const char* title, const char* unit, std::function<double()> func, int runs = 5)
+static void Bench(const char* title, const char* unit, std::function<double()> func, int runs = 5)
 {
 	std::vector<double> samples;
 	for (int i = 0; i < runs; i++)
@@ -303,7 +303,7 @@ void Bench(const char* title, const char* unit, std::function<double()> func, in
 	printf("%-20s %.2f %s (+- %.2f) (CV %.3f)\n", title, stats.Mean, unit, stats.StdDev, stats.CV);
 }
 
-void BenchThroughput()
+static void BenchThroughput()
 {
 	printf("RingKB MsgLen   KB/s   Msg/s\n");
 	size_t msgSizes[] = {1, 10, 200, 1000};
@@ -326,7 +326,7 @@ void BenchThroughput()
 	}
 }
 
-double BenchSpdCompare()
+static double BenchSpdCompare()
 {
 	int           nmsg = 1000000;
 	LogOpenCloser oc(1024 * 1024, 5 * 1024 * 1024);
@@ -343,7 +343,7 @@ enum Modes
 	ModeSimpleFmt,
 };
 
-double BenchLoggerLatency(Modes mode)
+static double BenchLoggerLatency(Modes mode)
 {
 	// Make the ring buffer size large enough that we never stall. We want to measure minimum latency here.
 	LogOpenCloser oc(32768 * 1024, 500 * 1024 * 1024);
@@ -370,7 +370,7 @@ double BenchLoggerLatency(Modes mode)
 	return 1000000000.0 * (end - start) / count;
 }
 
-void BenchFileWriteLatency()
+static void BenchFileWriteLatency()
 {
 #ifdef _WIN32
 	HANDLE fd = CreateFileA("xyz", GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
@@ -402,14 +402,14 @@ void BenchFileWriteLatency()
 #endif
 }
 
-void HelloWorld()
+static void HelloWorld()
 {
 	uberlog::Logger l;
 	l.Open("hello.log");
 	l.Info("Hello!");
 }
 
-void TestAll()
+static void TestAll()
 {
 	HelloWorld();
 	Bench("raw log", "ns", []() { return BenchLoggerLatency(ModeRaw); }, 10);
@@ -426,7 +426,7 @@ void TestAll()
 }
 
 #ifdef _WIN32
-int AllocHook(int allocType, void* userData, size_t size, int blockType, long requestNumber, const unsigned char* filename, int lineNumber)
+static int AllocHook(int allocType, void* userData, size_t size, int blockType, long requestNumber, const unsigned char* filename, int lineNumber)
 {
 	return TRUE;
 }
