@@ -4,7 +4,9 @@ Here we consume log messages from the ring buffer, and write them
 into the log file.
 */
 #ifdef _WIN32
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
