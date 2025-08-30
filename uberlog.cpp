@@ -312,12 +312,12 @@ void SharedMemObjectName(proc_id_t parentID, const char* logFilename, char shmNa
 	uint64_t h1 = siphash24(logFilename, strlen(logFilename), key1);
 	uint64_t h2 = siphash24(logFilename, strlen(logFilename), key2);
 #ifdef _WIN32
-	sprintf(shmName, "uberlog-shm-%u-%08x%08x%08x%08x", parentID, (uint32_t)(h1 >> 32), (uint32_t) h1, (uint32_t)(h2 >> 32), (uint32_t) h2);
+	sprintf(shmName, "uberlog-shm-%zu-%08x%08x%08x%08x", (size_t)parentID, (uint32_t)(h1 >> 32), (uint32_t) h1, (uint32_t)(h2 >> 32), (uint32_t) h2);
 #elif __APPLE__
 	// The constant PSHMNAMLEN is 31 on OSX, so we need to Think Different here
 	sprintf(shmName, "/uber%08x%08x%08x", (uint32_t)(h1 >> 32), (uint32_t) h1, (uint32_t) h2);
 #else
-	sprintf(shmName, "/uberlog-shm-%u-%08x%08x%08x%08x", parentID, (uint32_t)(h1 >> 32), (uint32_t) h1, (uint32_t)(h2 >> 32), (uint32_t) h2);
+	sprintf(shmName, "/uberlog-shm-%zu-%08x%08x%08x%08x", (size_t)parentID, (uint32_t)(h1 >> 32), (uint32_t) h1, (uint32_t)(h2 >> 32), (uint32_t) h2);
 #endif
 }
 
