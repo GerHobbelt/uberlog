@@ -539,7 +539,12 @@ uberlogger <parentpid> <ringsize> <logfilename> <maxlogsize> <maxarchives>)";
 } // namespace internal
 } // namespace uberlog
 
-int main(int argc, char** argv)
+
+#if defined(BUILD_MONOLITHIC)
+#define uberlog_uberlogger_main
+#endif
+
+extern "C" int main(int argc, const char** argv)
 {
 	bool showHelp = true;
 

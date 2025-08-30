@@ -432,7 +432,13 @@ static int AllocHook(int allocType, void* userData, size_t size, int blockType, 
 }
 #endif
 
-int main(int argc, char** argv)
+
+#if defined(BUILD_MONOLITHIC)
+#define uberlog_test_main
+#endif
+
+extern "C"
+int main(int argc, const char** argv)
 {
 #ifdef _WIN32
 	_CrtSetAllocHook(AllocHook);
